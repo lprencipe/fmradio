@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Web Radio GTA V - By lprencipe18</title>
   <style>
     /* Corps et typographie */
@@ -114,34 +115,28 @@
     /* Responsive mobile */
     @media (max-width: 480px) {
       body {
-        padding: 10px;
+        padding: 20px;
       }
-
       h1 {
-        font-size: 1.5rem;
-        margin-bottom: 20px;
+        font-size: 2.2rem;
+        margin-bottom: 30px;
       }
-
       .station {
-        padding: 12px 15px;
+        padding: 20px 25px;
       }
-
       .station-title {
-        font-size: 1rem;
-        max-width: 60vw;
+        font-size: 1.4rem;
+        max-width: 90vw;
       }
-
       button {
-        padding: 12px 20px;
-        font-size: 1rem;
-        min-width: 75px;
+        padding: 16px 28px;
+        font-size: 1.3rem;
+        min-width: 120px;
       }
-
       #currentStation {
-        font-size: 1.2rem;
-        margin-top: 0;
-        margin-bottom: 15px;
-        min-height: 28px;
+        font-size: 1.6rem;
+        margin-bottom: 30px;
+        min-height: 40px;
       }
     }
   </style>
@@ -205,12 +200,10 @@
         return;
       }
 
-      // Mettre en pause la musique en cours avant de lancer le son search
       if (!audioPlayer.paused) {
         audioPlayer.pause();
       }
 
-      // Jouer d'abord le son de recherche limité à 2 secondes
       audioSearch.currentTime = 0;
       audioSearch.play().catch(() => {});
 
@@ -235,13 +228,11 @@
         updateButtons();
       }, 2000);
 
-      // si audioSearch finit avant le timer, on nettoie le timer
       audioSearch.onended = () => {
         clearTimeout(timer);
       };
     }
 
-    // Création des boutons station dynamiquement
     stations.forEach((station, index) => {
       const div = document.createElement("div");
       div.className = "station";
