@@ -158,13 +158,6 @@
   <audio id="audioSearch" src="audio/search.mp3" preload="auto"></audio>
 
   <script>
-    // ----------------------------------------
-    // INSTRUCTIONS :
-    // 1. Remplacer les titres ci-dessous par le nom de chaque station/fichier
-    // 2. Remplacer les chemins dans "file" par le chemin vers les fichiers MP3 longs
-    // 3. Mettre la durée totale en secondes dans "duration" pour chaque fichier
-    // 4. Placer votre son "search_sound.mp3" dans le dossier audio
-    // ----------------------------------------
     const stations = [
       { title: "Non Stop Pop", file: "audio/nonstoppop.mp3", duration: 8752 },
       { title: "Flylo FM", file: "audio/flylofm.mp3", duration: 3871 },
@@ -180,7 +173,7 @@
     const currentStationLabel = document.getElementById("currentStation");
 
     let firstPlay = true;
-    let currentStationIndex = -1; // aucune sélection au départ
+    let currentStationIndex = -1;
     let isPlaying = false;
 
     function updateButtons() {
@@ -210,6 +203,11 @@
         }
         updateButtons();
         return;
+      }
+
+      // Mettre en pause la musique en cours avant de lancer le son search
+      if (!audioPlayer.paused) {
+        audioPlayer.pause();
       }
 
       // Jouer d'abord le son de recherche limité à 2 secondes
