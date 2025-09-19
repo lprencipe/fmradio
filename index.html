@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Web Radio GTA V - By lprencipe18</title>
+  <style>
+    /* Corps et typographie */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #121214;
+      color: #e1e1e1;
+      padding: 15px;
+      max-width: 600px;
+      margin: auto;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Titre */
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #d83434;
+      text-shadow: 0 0 8px #d83434;
+      font-size: 1.8rem;
+    }
+
+    /* Conteneur station */
+    .station {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1e1e22;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      transition: background 0.3s ease;
+      cursor: pointer;
+      box-shadow: inset 0 0 6px rgba(216, 52, 52, 0.3);
+    }
+
+    /* Hover */
+    .station:hover {
+      background: #2c2c30;
+      box-shadow: inset 0 0 12px rgba(216, 52, 52, 0.6);
+    }
+
+    /* Titre station */
+    .station-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 75vw;
+      color: #f0f0f0;
+      padding-right: 10px;
+    }
+
+    /* Bouton play */
+    button {
+      background: #d83434;
+      border: none;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      box-shadow: 0 3px 6px rgba(216, 52, 52, 0.6);
+      transition: background 0.2s ease;
+      user-select: none;
+      min-width: 90px;
+    }
+
+    /* Bouton hover/focus */
+    button:hover, button:focus {
+      background: #a62323;
+      outline: none;
+      box-shadow: 0 5px 12px rgba(166, 35, 35, 0.8);
+    }
+
+    /* Bouton stop */
+    button.stop {
+      background: #555;
+      box-shadow: none;
+    }
+    button.stop:hover {
+      background: #777;
+    }
+
+    /* Player audio caché */
+    audio#audioPlayer, audio#audioSearch {
+      display: none;
+    }
+
+    /* Label station en cours, déplacé en haut */
+    #currentStation {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-weight: 800;
+      font-size: 1.4rem;
+      text-align: center;
+      min-height: 30px;
+      color: #d83434;
+      text-shadow: 0 0 10px #d83434;
+      user-select: text;
+    }
+
+    /* Responsive mobile */
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+      }
+
+      .station {
+        padding: 12px 15px;
+      }
+
+      .station-title {
+        font-size: 1rem;
+        max-width: 60vw;
+      }
+
+      button {
+        padding: 12px 20px;
+        font-size: 1rem;
+        min-width: 75px;
+      }
+
+      #currentStation {
+        font-size: 1.2rem;
+        margin-top: 0;
+        margin-bottom: 15px;
+        min-height: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Web Radio GTA V - By lprencipe18</h1>
+
+  <div id="currentStation"></div>
+
+  <div id="stationsContainer"></div>
+
+  <audio id="audioPlayer" controls loop></audio>
+  <audio id="audioSearch" src="audio/search.mp3" preload="auto"></audio>
+
+  <script>
+    // ----------------------------------------
+    // INSTRUCTIONS :
+    // 1. Remplacer les titres ci-dessous par le nom de chaque station/fichier
+    // 2. Remplacer les chemins dans "file" par le chemin vers les fichiers MP3 longs
+    // 3. Mettre la durée totale en secondes dans "duration" pour chaque fichier
+    // 4. Placer votre son "search_sound.mp3" dans le dossier audio
+    // ----------------------------------------
+    const stations = [
+      { title: "Non Stop Pop", file: "audio/nonstoppop.mp3", duration: 8752 },
+      { title: "Flylo FM", file: "audio/flylofm.mp3", duration: 3871 },
+      { title: "Los Santos", file: "audio/lossantos.mp3", duration: 7299 },
+      { title: "West Coast Classic", file: "audio/westcoast.mp3", duration: 7292 },
+      { title: "iFruit", file: "audio/ifruit.mp3", duration: 5202 },
+      { title: "Still Sleeping", file: "audio/stillsleeping.mp3", duration: 4367 }
+    ];
+
+    const stationsContainer = document.getElementById("stationsContainer");
+    const audioPlayer = document.getElementById("audioPlayer");
+    const audioSearch = document.getElementById("audioSearch");
+    const currentStationLabel = document.getElementById("currentStation");
+
+    let firstPlay = true;
+    let currentStationIndex = -1; // aucune sélection au départ
+    let isPlaying = false;
+
+    function updateButtons() {
+      const buttons = stationsContainer.querySelectorAll("button");
+      buttons.forEach((btn, idx) => {
+        if (idx === currentStationIndex && isPlaying) {
+          btn.textContent = "Stop";
+          btn.classList.add("stop");
+        } else {
+          btn.textContent = "Play";
+          btn.classList.remove("stop");
+        }
+      });
+    }
+
+    function playStation(index) {
+      if (index === currentStationIndex) {
+        if (isPlaying) {
+          audioPlayer.pause();
+          isPlaying = false;
+        } else {
+          const now = Date.now() / 1000;
+          const positionInCycle = now % stations[index].duration;
+          audioPlayer.currentTime = positionInCycle;
+          audioPlayer.play().catch(() => {});
+          isPlaying = true;
+        }
+        updateButtons();
+        return;
+      }
+
+      // Jouer d'abord le son de recherche limité à 2 secondes
+      audioSearch.currentTime = 0;
+      audioSearch.play().catch(() => {});
+
+      let timer = setTimeout(() => {
+        audioSearch.pause();
+        audioSearch.currentTime = 0;
+
+        const now = Date.now() / 1000;
+        const station = stations[index];
+        const positionInCycle = now % station.duration;
+
+        audioPlayer.src = station.file;
+        audioPlayer.currentTime = positionInCycle;
+        audioPlayer.play().catch(() => {});
+
+        currentStationLabel.textContent = "En écoute : " + station.title;
+
+        firstPlay = false;
+        currentStationIndex = index;
+        isPlaying = true;
+
+        updateButtons();
+      }, 2000);
+
+      // si audioSearch finit avant le timer, on nettoie le timer
+      audioSearch.onended = () => {
+        clearTimeout(timer);
+      };
+    }
+
+    // Création des boutons station dynamiquement
+    stations.forEach((station, index) => {
+      const div = document.createElement("div");
+      div.className = "station";
+
+      const title = document.createElement("div");
+      title.className = "station-title";
+      title.textContent = station.title;
+
+      const btn = document.createElement("button");
+      btn.textContent = "Play";
+      btn.addEventListener("click", () => playStation(index));
+
+      div.appendChild(title);
+      div.appendChild(btn);
+      stationsContainer.appendChild(div);
+    });
+  </script>
+
+</body>
+</html>
